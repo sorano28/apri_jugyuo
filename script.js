@@ -15,7 +15,7 @@ const alarmModeEl = document.getElementById("alarmMode");
 const missionQuestionEl = document.getElementById("missionQuestion");
 const missionAnswerEl = document.getElementById("missionAnswer");
 const missionSubmitBtn = document.getElementById("missionSubmit");
-const snoozeBtn = document.getElementById("snoozeBtn");
+
 const missionFeedbackEl = document.getElementById("missionFeedback");
 const alarmAudio = document.getElementById("alarmAudio");
 const unlockAudioBtn = document.getElementById("unlockAudioBtn");
@@ -30,13 +30,12 @@ let tauntIntervalId = null;
 let audioIntervalId = null;
 let webAudioIntervalId = null;
 let failTimeoutId = null;
-let pendingSnoozeTimeoutId = null;
+
 let audioContext = null;
 let audioUnlocked = false;
 let selectedVoice = null;
 let failLogs = loadFailLogs();
-let snoozeCount = 0;
-const MAX_SNOOZE_COUNT = 3;
+
 
 const tauntFragments = [
   "まだ寝てるの？",
@@ -117,11 +116,6 @@ function recordFailIfNeeded() {
   renderLateMessage();
 }
 
-function updateSnoozeButton() {
-  const remaining = Math.max(0, MAX_SNOOZE_COUNT - snoozeCount);
-  snoozeBtn.textContent = `スヌーズ（残り${remaining}回）`;
-  snoozeBtn.disabled = remaining === 0;
-}
 
 function renderPresets() {
   presetListEl.innerHTML = "";
@@ -290,8 +284,7 @@ async function unlockAudioAndSpeech() {
   unlockAudioBtn.classList.add("hidden");
 }
 
-function startAlarm(nowText, options = {}) {
-  const { resetFailTimer = true } = options;
+
   if (alarmActive) return;
   alarmActive = true;
   showAlarmMode();
@@ -310,18 +303,7 @@ function startAlarm(nowText, options = {}) {
   speakTaunt();
   tauntIntervalId = window.setInterval(speakTaunt, 30000);
 
-  if (resetFailTimer) {
-    if (failTimeoutId) {
-      window.clearTimeout(failTimeoutId);
-    }
-    failTimeoutId = window.setTimeout(() => {
-      recordFailIfNeeded();
-    }, 3 * 60 * 1000);
-  }
-}
 
-function stopAlarm(options = {}) {
-  const { keepFailTimer = false } = options;
   alarmActive = false;
   alarmAudio.pause();
   alarmAudio.currentTime = 0;
@@ -339,14 +321,7 @@ function stopAlarm(options = {}) {
     window.clearInterval(webAudioIntervalId);
     webAudioIntervalId = null;
   }
-  if (!keepFailTimer && failTimeoutId) {
-    window.clearTimeout(failTimeoutId);
-    failTimeoutId = null;
-  }
-  if (!keepFailTimer && pendingSnoozeTimeoutId) {
-    window.clearTimeout(pendingSnoozeTimeoutId);
-    pendingSnoozeTimeoutId = null;
-  }
+
 
   showNormalMode();
 }
@@ -366,12 +341,7 @@ function checkAlarmTrigger() {
   const minuteKey = `${nowText}:${now.getDate()}`;
   if (nowText === selectedPreset && alarmTriggeredAtMinute !== minuteKey) {
     alarmTriggeredAtMinute = minuteKey;
-    snoozeCount = 0;
-    updateSnoozeButton();
-    if (pendingSnoozeTimeoutId) {
-      window.clearTimeout(pendingSnoozeTimeoutId);
-      pendingSnoozeTimeoutId = null;
-    }
+
     startAlarm(nowText);
   }
 }
@@ -430,24 +400,6 @@ missionSubmitBtn.addEventListener("click", () => {
   missionAnswerEl.focus();
 });
 
-snoozeBtn.addEventListener("click", () => {
-  unlockAudioAndSpeech();
-  if (!alarmActive) return;
-  if (snoozeCount >= MAX_SNOOZE_COUNT) return;
-
-  snoozeCount += 1;
-  updateSnoozeButton();
-  missionFeedbackEl.textContent = `1分後に再アラーム（${snoozeCount}/${MAX_SNOOZE_COUNT}）`;
-
-  stopAlarm({ keepFailTimer: true });
-  if (pendingSnoozeTimeoutId) {
-    window.clearTimeout(pendingSnoozeTimeoutId);
-  }
-  pendingSnoozeTimeoutId = window.setTimeout(() => {
-    pendingSnoozeTimeoutId = null;
-    startAlarm(formatTime(new Date()), { resetFailTimer: false });
-  }, 60 * 1000);
-});
 
 missionAnswerEl.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
@@ -466,6 +418,4 @@ if ("speechSynthesis" in window) {
 initializeSelectedPreset();
 renderPresets();
 renderLateMessage();
-updateSnoozeButton();
-checkAlarmTrigger();
-setInterval(checkAlarmTrigger, 1000);
+

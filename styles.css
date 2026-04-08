@@ -100,8 +100,7 @@ body {
 
 .add-btn,
 .primary-btn,
-.danger-btn,
-.snooze-btn {
+
   border: none;
   border-radius: 12px;
   color: #fff;
@@ -131,8 +130,7 @@ body {
 }
 
 .primary-btn,
-.danger-btn,
-.snooze-btn {
+
   padding: 10px 16px;
 }
 
@@ -251,11 +249,6 @@ body {
   background: var(--danger);
 }
 
-.snooze-btn {
-  width: 100%;
-  margin-top: 10px;
-  background: #2f6fff;
-}
 
 .mission-feedback {
   min-height: 1.5em;
