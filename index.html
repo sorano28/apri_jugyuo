@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>目覚ましAI</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app" id="app">
+      <button id="unlockAudioBtn" class="unlock-audio-btn">
+        音声を有効化（最初に1回タップ）
+      </button>
+      <section class="card normal-mode" id="normalMode" aria-live="polite">
+        <header class="clock-header">
+          <p class="clock-label">現在時刻</p>
+          <p class="clock" id="currentClock">--:--</p>
+          <p class="late-message" id="lateMessage">今日も寝坊、累計0回</p>
+        </header>
+
+        <section class="preset-section">
+          <div class="section-title-wrap">
+            <h1 class="section-title">アラーム時刻</h1>
+            <button id="addPresetBtn" class="add-btn" aria-label="プリセットを追加">＋</button>
+          </div>
+
+          <form id="presetForm" class="preset-form hidden">
+            <input type="time" id="presetTimeInput" required />
+            <button type="submit" class="primary-btn">追加</button>
+          </form>
+
+          <ul id="presetList" class="preset-list" aria-label="プリセット一覧"></ul>
+        </section>
+      </section>
+
+      <section class="alarm-mode hidden" id="alarmMode" aria-live="assertive">
+        <p class="alarm-caption">アラーム発動中</p>
+        <p class="alarm-time" id="alarmClock">--:--</p>
+
+        <div class="mission-card">
+          <p class="mission-title">停止ミッション</p>
+          <p class="mission-question" id="missionQuestion">0 + 0 = ?</p>
+          <input
+            type="number"
+            id="missionAnswer"
+            class="mission-input"
+            inputmode="numeric"
+            placeholder="答えを入力"
+          />
+          <button id="missionSubmit" class="danger-btn">送信</button>
+          <button id="snoozeBtn" class="snooze-btn">スヌーズ（残り3回）</button>
+          <p id="missionFeedback" class="mission-feedback" aria-live="polite"></p>
+        </div>
+      </section>
+    </main>
+
+    <audio id="alarmAudio" preload="auto" loop>
+      <source
+        src="data:audio/wav;base64,UklGRrQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZAIAAAAAMT3yfWPf3V4d35+h4yVoKzA0uf6//f08uHQt6KDdV9JNzxQYXWPrbrU6urv6+LdxbKeiYKPmLWlqbi0sMh8WlQ8Nj9nr6SnxN7h8+fcyqN2XVVLMkdMY4S7vtzp5NnNybGaf09NQkFfZ6Gxv8jQ4uXr79zMyK2fgnRkPCgB+v/P3f34+fbo4drLrY2ATx4AAAA="
+        type="audio/wav"
+      />
+    </audio>
+
+    <script src="script.js"></script>
+  </body>
+</html>
