@@ -8,10 +8,14 @@
   </head>
   <body>
     <main class="app" id="app">
+      <button id="unlockAudioBtn" class="unlock-audio-btn">
+        音声を有効化（最初に1回タップ）
+      </button>
       <section class="card normal-mode" id="normalMode" aria-live="polite">
         <header class="clock-header">
           <p class="clock-label">現在時刻</p>
           <p class="clock" id="currentClock">--:--</p>
+          <p class="late-message" id="lateMessage">今日も寝坊、累計0回</p>
         </header>
 
         <section class="preset-section">
