@@ -1,6 +1,7 @@
 const STORAGE_KEYS = {
   SELECTED_PRESET: "selectedPreset",
   PRESETS: "presets",
+  FAIL_LOGS: "failLogs",
 };
 
 const currentClockEl = document.getElementById("currentClock");
@@ -17,6 +18,7 @@ const missionSubmitBtn = document.getElementById("missionSubmit");
 const missionFeedbackEl = document.getElementById("missionFeedback");
 const alarmAudio = document.getElementById("alarmAudio");
 const unlockAudioBtn = document.getElementById("unlockAudioBtn");
+const lateMessageEl = document.getElementById("lateMessage");
 
 let presets = loadPresets();
 let selectedPreset = localStorage.getItem(STORAGE_KEYS.SELECTED_PRESET) || "";
@@ -26,9 +28,11 @@ let currentMission = createMission();
 let tauntIntervalId = null;
 let audioIntervalId = null;
 let webAudioIntervalId = null;
+let failTimeoutId = null;
 let audioContext = null;
 let audioUnlocked = false;
 let selectedVoice = null;
+let failLogs = loadFailLogs();
 
 const tauntFragments = [
   "まだ寝てるの？",
@@ -61,6 +65,52 @@ function loadPresets() {
 
 function savePresets() {
   localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(presets));
+}
+
+function loadFailLogs() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.FAIL_LOGS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item));
+  } catch {
+    return [];
+  }
+}
+
+function saveFailLogs() {
+  localStorage.setItem(STORAGE_KEYS.FAIL_LOGS, JSON.stringify(failLogs));
+}
+
+function getTodayKey(date = new Date()) {
+  const y = date.getFullYear();
+  const m = pad2(date.getMonth() + 1);
+  const d = pad2(date.getDate());
+  return `${y}-${m}-${d}`;
+}
+
+function createLateMessage() {
+  const total = failLogs.length;
+  if (total <= 5) {
+    return `今日も寝坊、累計${total}回`;
+  }
+  if (total <= 15) {
+    return `またやったね。これで累計${total}回`;
+  }
+  return `もう言い訳できないよ。累計${total}回`;
+}
+
+function renderLateMessage() {
+  lateMessageEl.textContent = createLateMessage();
+}
+
+function recordFailIfNeeded() {
+  const today = getTodayKey();
+  if (failLogs.includes(today)) return;
+  failLogs.push(today);
+  saveFailLogs();
+  renderLateMessage();
 }
 
 function renderPresets() {
@@ -248,6 +298,15 @@ function startAlarm(nowText) {
 
   speakTaunt();
   tauntIntervalId = window.setInterval(speakTaunt, 30000);
+
+  if (failTimeoutId) {
+    window.clearTimeout(failTimeoutId);
+  }
+  failTimeoutId = window.setTimeout(() => {
+    if (alarmActive) {
+      recordFailIfNeeded();
+    }
+  }, 3 * 60 * 1000);
 }
 
 function stopAlarm() {
@@ -267,6 +326,10 @@ function stopAlarm() {
   if (webAudioIntervalId) {
     window.clearInterval(webAudioIntervalId);
     webAudioIntervalId = null;
+  }
+  if (failTimeoutId) {
+    window.clearTimeout(failTimeoutId);
+    failTimeoutId = null;
   }
 
   showNormalMode();
@@ -361,5 +424,6 @@ if ("speechSynthesis" in window) {
 
 initializeSelectedPreset();
 renderPresets();
+renderLateMessage();
 checkAlarmTrigger();
 setInterval(checkAlarmTrigger, 1000);

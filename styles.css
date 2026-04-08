@@ -70,6 +70,17 @@ body {
   font-weight: 700;
 }
 
+.late-message {
+  margin: 10px auto 0;
+  max-width: 28ch;
+  font-size: 0.95rem;
+  color: #5e3240;
+  background: #ffe4eb;
+  border: 1px solid #ffc3d2;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
 .preset-section {
   display: flex;
   flex-direction: column;
