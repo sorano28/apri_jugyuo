@@ -15,6 +15,7 @@ const alarmModeEl = document.getElementById("alarmMode");
 const missionQuestionEl = document.getElementById("missionQuestion");
 const missionAnswerEl = document.getElementById("missionAnswer");
 const missionSubmitBtn = document.getElementById("missionSubmit");
+
 const missionFeedbackEl = document.getElementById("missionFeedback");
 const alarmAudio = document.getElementById("alarmAudio");
 const unlockAudioBtn = document.getElementById("unlockAudioBtn");
@@ -29,10 +30,12 @@ let tauntIntervalId = null;
 let audioIntervalId = null;
 let webAudioIntervalId = null;
 let failTimeoutId = null;
+
 let audioContext = null;
 let audioUnlocked = false;
 let selectedVoice = null;
 let failLogs = loadFailLogs();
+
 
 const tauntFragments = [
   "まだ寝てるの？",
@@ -112,6 +115,7 @@ function recordFailIfNeeded() {
   saveFailLogs();
   renderLateMessage();
 }
+
 
 function renderPresets() {
   presetListEl.innerHTML = "";
@@ -280,7 +284,7 @@ async function unlockAudioAndSpeech() {
   unlockAudioBtn.classList.add("hidden");
 }
 
-function startAlarm(nowText) {
+
   if (alarmActive) return;
   alarmActive = true;
   showAlarmMode();
@@ -299,17 +303,7 @@ function startAlarm(nowText) {
   speakTaunt();
   tauntIntervalId = window.setInterval(speakTaunt, 30000);
 
-  if (failTimeoutId) {
-    window.clearTimeout(failTimeoutId);
-  }
-  failTimeoutId = window.setTimeout(() => {
-    if (alarmActive) {
-      recordFailIfNeeded();
-    }
-  }, 3 * 60 * 1000);
-}
 
-function stopAlarm() {
   alarmActive = false;
   alarmAudio.pause();
   alarmAudio.currentTime = 0;
@@ -327,10 +321,7 @@ function stopAlarm() {
     window.clearInterval(webAudioIntervalId);
     webAudioIntervalId = null;
   }
-  if (failTimeoutId) {
-    window.clearTimeout(failTimeoutId);
-    failTimeoutId = null;
-  }
+
 
   showNormalMode();
 }
@@ -350,6 +341,7 @@ function checkAlarmTrigger() {
   const minuteKey = `${nowText}:${now.getDate()}`;
   if (nowText === selectedPreset && alarmTriggeredAtMinute !== minuteKey) {
     alarmTriggeredAtMinute = minuteKey;
+
     startAlarm(nowText);
   }
 }
@@ -408,6 +400,7 @@ missionSubmitBtn.addEventListener("click", () => {
   missionAnswerEl.focus();
 });
 
+
 missionAnswerEl.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
@@ -425,6 +418,4 @@ if ("speechSynthesis" in window) {
 initializeSelectedPreset();
 renderPresets();
 renderLateMessage();
-checkAlarmTrigger();
-setInterval(checkAlarmTrigger, 1000);
 

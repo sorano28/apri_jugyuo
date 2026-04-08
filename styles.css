@@ -100,7 +100,7 @@ body {
 
 .add-btn,
 .primary-btn,
-.danger-btn {
+
   border: none;
   border-radius: 12px;
   color: #fff;
@@ -130,7 +130,7 @@ body {
 }
 
 .primary-btn,
-.danger-btn {
+
   padding: 10px 16px;
 }
 
@@ -248,6 +248,7 @@ body {
   width: 100%;
   background: var(--danger);
 }
+
 
 .mission-feedback {
   min-height: 1.5em;
